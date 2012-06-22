@@ -6,7 +6,7 @@ using log4net.Layout;
 
 namespace log4net.Appender
 {
-	public class RabbitMQAppender : IBulkAppender, IOptionHandler
+	public class RabbitMQAppender : AppenderSkeleton
 	{
 		private readonly XmlLayout _xmlLayout = new XmlLayout();
 		private readonly ModelHandler _modelHandler = new ModelHandler();
@@ -51,29 +51,22 @@ namespace log4net.Appender
 		/// </summary>
 		public string RoutingKey { get; set; }
 
-		public string Name { get; set; }
-
-		public void Close()
+		protected override void OnClose()
 		{
 			_modelHandler.ShutDown();
 		}
 
-		public void DoAppend(LoggingEvent loggingEvent)
+		protected override void Append(LoggingEvent[] loggingEvents)
 		{
-			DoAppend(new[] {loggingEvent});
-		}
-
-		public void DoAppend(LoggingEvent[] logs)
-		{
-			var model = _modelHandler.GetModel();
-			var basicProperties = model.CreateBasicProperties();
+			IModel model = _modelHandler.GetModel();
+			IBasicProperties basicProperties = model.CreateBasicProperties();
 			basicProperties.ContentEncoding = "utf-8";
 			basicProperties.ContentType = "application/xml";
 
 			var sb = new StringBuilder(@"<?xml version=""1.0"" ?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">");
-			using (var sr = new StringWriter(sb))
+			using(var sr = new StringWriter(sb))
 			{
-				foreach (var log in logs)
+				foreach(LoggingEvent log in loggingEvents)
 				{
 					_xmlLayout.Format(sr, log);
 				}
@@ -83,7 +76,12 @@ namespace log4net.Appender
 			model.BasicPublish(Exchange ?? "logs", RoutingKey ?? "", basicProperties, Encoding.UTF8.GetBytes(sb.ToString()));
 		}
 
-		public void ActivateOptions()
+		protected override void Append(LoggingEvent loggingEvent)
+		{
+			Append(new[] { loggingEvent });
+		}
+
+		public override void ActivateOptions()
 		{
 			_modelHandler.ActivateOptions(new ConnectionFactory {
 				HostName = HostName ?? "localhost",
