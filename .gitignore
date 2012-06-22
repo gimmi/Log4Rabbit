@@ -1,0 +1,14 @@
+# Visual Studio stuff
+/src/*.user
+/src/*.suo
+/src/*/bin/
+/src/*/obj/
+/src/*/*.user
+
+# Managed by NuGet
+/lib/
+
+# build files
+/TestResult.xml
+/build/
+/src/SharedAssemblyInfo.cs
