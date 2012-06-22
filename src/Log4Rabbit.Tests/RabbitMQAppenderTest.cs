@@ -1,9 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Security.Principal;
+using System.Text;
 using System.Threading;
 using NUnit.Framework;
 using SharpTestsEx;
+using log4net.Config;
 
 namespace log4net.Appender
 {
@@ -13,6 +16,16 @@ namespace log4net.Appender
 		[SetUp]
 		public void SetUp()
 		{
+			XmlConfigurator.Configure(new MemoryStream(Encoding.UTF8.GetBytes(@"
+<log4net>
+	<appender name='RabbitMQAppender' type='log4net.Appender.RabbitMQAppender, Log4Rabbit' />
+	<root>
+		<level value='ALL' />
+		<appender-ref ref='RabbitMQAppender' />
+	</root>
+</log4net>
+")));
+
 			_target = LogManager.GetLogger("Test");
 		}
 

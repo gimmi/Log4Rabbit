@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using RabbitMQ.Client;
-using log4net.Config;
 
 namespace log4net.Appender
 {
@@ -13,13 +12,10 @@ namespace log4net.Appender
 		[SetUp]
 		public void SetUp()
 		{
-			//LogLog.InternalDebugging = true; // For capturing log4net internal logging. See http://logging.apache.org/log4net/release/faq.html
-			XmlConfigurator.Configure();
-
 			ConnectionFactory = new ConnectionFactory();
-			using (IConnection connection = ConnectionFactory.CreateConnection())
+			using(IConnection connection = ConnectionFactory.CreateConnection())
 			{
-				using (IModel model = connection.CreateModel())
+				using(IModel model = connection.CreateModel())
 				{
 					model.ExchangeDeclare("logs", ExchangeType.Fanout, true);
 					model.QueueDeclare(QueueName, true, false, false, null);

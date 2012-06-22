@@ -9,15 +9,46 @@ namespace log4net.Appender
 	public class RabbitMQAppender : IBulkAppender, IOptionHandler
 	{
 		private readonly XmlLayout _xmlLayout = new XmlLayout();
-		private ModelHandler _modelHandler = new ModelHandler();
+		private readonly ModelHandler _modelHandler = new ModelHandler();
 
+		/// <summary>
+		/// Default to "localhost"
+		/// </summary>
 		public string HostName { get; set; }
+
+		/// <summary>
+		/// Default to "/"
+		/// </summary>
 		public string VirtualHost { get; set; }
+
+		/// <summary>
+		/// Default to "guest"
+		/// </summary>
 		public string UserName { get; set; }
+
+		/// <summary>
+		/// Default to "guest"
+		/// </summary>
 		public string Password { get; set; }
+
+		/// <summary>
+		/// Default to 60 seconds
+		/// </summary>
 		public ushort? RequestedHeartbeat { get; set; }
+
+		/// <summary>
+		/// Default to 5672
+		/// </summary>
 		public int? Port { get; set; }
+
+		/// <summary>
+		/// Default to "logs"
+		/// </summary>
 		public string Exchange { get; set; }
+
+		/// <summary>
+		/// Default to ""
+		/// </summary>
 		public string RoutingKey { get; set; }
 
 		public string Name { get; set; }
