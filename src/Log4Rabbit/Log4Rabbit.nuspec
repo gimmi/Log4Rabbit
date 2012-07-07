@@ -8,7 +8,7 @@
     <owners>$author$</owners>
 	<licenseUrl>https://github.com/gimmi/Log4Rabbit/raw/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/gimmi/Log4Rabbit</projectUrl>
-    <iconUrl>https://github.com/gimmi/mongobrowser/raw/master/icon.png</iconUrl>
+    <iconUrl>https://github.com/gimmi/Log4Rabbit/raw/master/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <tags>log logging log4net debug diagnostic trace db amqp rabbit rabbitmq queue appender message messaging</tags>
