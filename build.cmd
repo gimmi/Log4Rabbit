@@ -1,1 +1,1 @@
-tools\jsmake\jsmake.cmd %*
+%~dp0\tools\psake\psake.cmd %*
