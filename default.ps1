@@ -27,8 +27,8 @@ Task AssemblyInfo {
         "[assembly: System.Reflection.AssemblyTrademark(`"`")]",
         "[assembly: System.Reflection.AssemblyCompany(`"Gian Marco Gherardi`")]",
         "[assembly: System.Reflection.AssemblyConfiguration(`"$build_cfg`")]",
-        "[assembly: System.Reflection.AssemblyVersion(`"$version`")]",
-        "[assembly: System.Reflection.AssemblyFileVersion(`"$version`")]",
+        "[assembly: System.Reflection.AssemblyVersion(`"$version.0`")]",
+        "[assembly: System.Reflection.AssemblyFileVersion(`"$version.0`")]",
         "[assembly: System.Reflection.AssemblyInformationalVersion(`"$version`")]"
     ) | Out-File "$build_dir\src\SharedAssemblyInfo.cs" -Encoding 'utf8'
 }
@@ -53,7 +53,7 @@ Task Publish -Depends Clean, Test {
 
     $version = $version -split "\."
     $version[2] =  [System.Int32]::Parse($version[2]) + 1
-    $version -join "." | Out-File  $build_dir\version.txt
+    $version -join "." | Out-File  $build_dir\version.txt -Encoding 'utf8'
 }
 
 Task Clean {
