@@ -44,11 +44,18 @@ Task Test -Depends Compile {
 }
 
 Task Publish -Depends Clean, Test {
-    New-Item build -type directory
-   	Exec { & "$build_dir\tools\nuget\nuget.exe" pack "$build_dir\src\Log4Rabbit\Log4Rabbit.csproj" -Build -OutputDirectory $build_dir\build, -Symbols }
+    $version = Get-Content $build_dir\version.txt
     
+    New-Item $build_dir\build -type directory
+
+   	Exec { & "$build_dir\tools\nuget\nuget.exe" pack "$build_dir\src\Log4Rabbit\Log4Rabbit.csproj" -Build -OutputDirectory $build_dir\build, -Symbols }
+	#Exec { & "$build_dir\tools\nuget\nuget.exe" push "$build_dir\build\Log4Rabbit.$version.nupkg" }
+
+    $version = $version -split "\."
+    $version[2] =  [System.Int32]::Parse($version[2]) + 1
+    $version -join "." | Out-File  $build_dir\version.txt
 }
 
 Task Clean {
-	# Exec { git --git-dir="$build_dir\.git" --work-tree="$build_dir" clean -d -x -f }
+	Exec { git --git-dir="$build_dir\.git" --work-tree="$build_dir" clean -d -x -f }
 }
