@@ -2,7 +2,7 @@ Framework "4.0"
 
 Properties {
 	$build_dir = Split-Path $psake.build_script_file
-    $build_cfg = "Debug"
+    $build_cfg = "Release"
 }
 
 Task default -Depends Test
@@ -48,7 +48,7 @@ Task Publish -Depends Clean, Test {
     
     New-Item $build_dir\build -type directory
 
-   	Exec { & "$build_dir\tools\nuget\nuget.exe" pack "$build_dir\src\Log4Rabbit\Log4Rabbit.csproj" -Build -OutputDirectory $build_dir\build, -Symbols }
+   	Exec { & "$build_dir\tools\nuget\nuget.exe" pack "$build_dir\src\Log4Rabbit\Log4Rabbit.csproj" -Build -OutputDirectory $build_dir\build, -Symbols -Prop Configuration=$build_cfg }
 	#Exec { & "$build_dir\tools\nuget\nuget.exe" push "$build_dir\build\Log4Rabbit.$version.nupkg" }
 
     $version = $version -split "\."
