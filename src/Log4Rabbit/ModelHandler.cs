@@ -1,4 +1,7 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
+using log4net.Core;
 
 namespace log4net.Appender
 {
@@ -9,9 +12,11 @@ namespace log4net.Appender
 		private IModel _model;
 		private string _exchange;
 		private string _routingKey;
+		private IErrorHandler _errorHandler;
 
-		public void ActivateOptions(ConnectionFactory connectionFactory, string exchange, string routingKey)
+		public void ActivateOptions(ConnectionFactory connectionFactory, string exchange, string routingKey, IErrorHandler errorHandler)
 		{
+			_errorHandler = errorHandler;
 			_routingKey = routingKey;
 			_exchange = exchange;
 			_connectionFactory = connectionFactory;
@@ -24,8 +29,9 @@ namespace log4net.Appender
 			{
 				InternalPublish(contentEncoding, contentType, body);
 			}
-			catch (RabbitMQ.Client.Exceptions.OperationInterruptedException)
+			catch(Exception e)
 			{
+				_errorHandler.Error("Cannot publish log. Will try to recover", e);
 				Connect();
 				InternalPublish(contentEncoding, contentType, body);
 			}
