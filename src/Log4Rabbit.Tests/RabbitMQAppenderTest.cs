@@ -5,6 +5,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
+using RabbitMQ.Client;
 using SharpTestsEx;
 using log4net.Config;
 

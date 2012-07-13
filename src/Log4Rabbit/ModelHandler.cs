@@ -7,33 +7,55 @@ namespace log4net.Appender
 		private ConnectionFactory _connectionFactory;
 		private IConnection _connection;
 		private IModel _model;
+		private string _exchange;
+		private string _routingKey;
 
-		public void ActivateOptions(ConnectionFactory connectionFactory)
+		public void ActivateOptions(ConnectionFactory connectionFactory, string exchange, string routingKey)
 		{
+			_routingKey = routingKey;
+			_exchange = exchange;
 			_connectionFactory = connectionFactory;
+			Connect();
 		}
 
-		public IModel GetModel()
+		public void Publish(string contentEncoding, string contentType, byte[] body)
 		{
-			if (_model == null || !_model.IsOpen)
+			try
 			{
-				ShutDown();
-				_connection = _connectionFactory.CreateConnection();
-				_model = _connection.CreateModel();
+				InternalPublish(contentEncoding, contentType, body);
 			}
-			return _model;
+			catch (RabbitMQ.Client.Exceptions.OperationInterruptedException)
+			{
+				Connect();
+				InternalPublish(contentEncoding, contentType, body);
+			}
+		}
+
+		private void InternalPublish(string contentEncoding, string contentType, byte[] body)
+		{
+			IBasicProperties basicProperties = _model.CreateBasicProperties();
+			basicProperties.ContentEncoding = contentEncoding;
+			basicProperties.ContentType = contentType;
+			_model.BasicPublish(_exchange, _routingKey, basicProperties, body);
+		}
+
+		private void Connect()
+		{
+			ShutDown();
+			_connection = _connectionFactory.CreateConnection();
+			_model = _connection.CreateModel();
 		}
 
 		public void ShutDown()
 		{
-			if (_model != null)
+			if(_model != null)
 			{
-				_model.Dispose();
+				_model.Abort();
 				_model = null;
 			}
-			if (_connection != null)
+			if(_connection != null)
 			{
-				_connection.Dispose();
+				_connection.Abort(0);
 				_connection = null;
 			}
 		}

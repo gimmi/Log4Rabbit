@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using RabbitMQ.Client;
 using log4net.Core;
 using log4net.Layout;
+using log4net.Util;
 
 namespace log4net.Appender
 {
@@ -58,11 +60,6 @@ namespace log4net.Appender
 
 		protected override void Append(LoggingEvent[] loggingEvents)
 		{
-			IModel model = _modelHandler.GetModel();
-			IBasicProperties basicProperties = model.CreateBasicProperties();
-			basicProperties.ContentEncoding = "utf-8";
-			basicProperties.ContentType = "application/xml";
-
 			var sb = new StringBuilder(@"<?xml version=""1.0"" ?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">");
 			using(var sr = new StringWriter(sb))
 			{
@@ -73,7 +70,7 @@ namespace log4net.Appender
 			}
 			sb.Append("</events>");
 
-			model.BasicPublish(Exchange ?? "logs", RoutingKey ?? "", basicProperties, Encoding.UTF8.GetBytes(sb.ToString()));
+			_modelHandler.Publish("utf-8", "application/xml", Encoding.UTF8.GetBytes(sb.ToString()));
 		}
 
 		protected override void Append(LoggingEvent loggingEvent)
@@ -83,14 +80,15 @@ namespace log4net.Appender
 
 		public override void ActivateOptions()
 		{
-			_modelHandler.ActivateOptions(new ConnectionFactory {
-				HostName = HostName ?? "localhost",
-				VirtualHost = VirtualHost ?? "/",
-				UserName = UserName ?? "guest",
-				Password = Password ?? "guest",
-				RequestedHeartbeat = RequestedHeartbeat ?? 60,
+			var factory = new ConnectionFactory {
+				HostName = HostName ?? "localhost", 
+				VirtualHost = VirtualHost ?? "/", 
+				UserName = UserName ?? "guest", 
+				Password = Password ?? "guest", 
+				RequestedHeartbeat = RequestedHeartbeat ?? 60, 
 				Port = Port ?? 5672
-			});
+			};
+			_modelHandler.ActivateOptions(factory, Exchange ?? "logs", RoutingKey ?? "");
 		}
 	}
 }

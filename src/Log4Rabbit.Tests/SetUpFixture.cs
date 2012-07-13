@@ -12,6 +12,8 @@ namespace log4net.Appender
 		[SetUp]
 		public void SetUp()
 		{
+			Util.LogLog.InternalDebugging = true;
+
 			ConnectionFactory = new ConnectionFactory();
 			using(IConnection connection = ConnectionFactory.CreateConnection())
 			{
