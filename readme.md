@@ -11,7 +11,16 @@ Installation
 Appender configuration sample
 -----------------------------
 
-	<appender name="RabbitMQAppender" type="log4net.Appender.RabbitMQAppender, Log4Rabbit" />
+	<appender name='RabbitMQAppender' type='log4net.Appender.RabbitMQAppender, Log4Rabbit'>
+		<HostName value='localhost'/> <!-- Default to localhost -->
+		<VirtualHost value='/'/> <!-- Default to / -->
+		<UserName value='guest'/> <!-- Default to guest -->
+		<Password value='guest'/> <!-- Default to guest -->
+		<RequestedHeartbeat value='60'/> <!-- Default to 60 seconds -->
+		<Port value='5672'/> <!-- Default to 5672 -->
+		<Exchange value='logs'/> <!-- Default to logs -->
+		<RoutingKey value=''/> <!-- Default to empty -->
+	</appender>
 
 License
 -------
