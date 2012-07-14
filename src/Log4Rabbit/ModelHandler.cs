@@ -1,6 +1,5 @@
 ﻿using System;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Exceptions;
 using log4net.Core;
 
 namespace log4net.Appender
@@ -42,6 +41,7 @@ namespace log4net.Appender
 			IBasicProperties basicProperties = _model.CreateBasicProperties();
 			basicProperties.ContentEncoding = contentEncoding;
 			basicProperties.ContentType = contentType;
+			basicProperties.DeliveryMode = 2;
 			_model.BasicPublish(_exchange, _routingKey, basicProperties, body);
 		}
 
