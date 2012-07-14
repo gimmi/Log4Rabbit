@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using RabbitMQ.Client;
 using log4net.Core;
 using log4net.Layout;
-using log4net.Util;
 
 namespace log4net.Appender
 {
@@ -14,42 +12,42 @@ namespace log4net.Appender
 		private readonly ModelHandler _modelHandler = new ModelHandler();
 
 		/// <summary>
-		/// Default to "localhost"
+		/// Optional, default to RabbitMQ.Client.ConnectionFactory default
 		/// </summary>
 		public string HostName { get; set; }
 
 		/// <summary>
-		/// Default to "/"
+		/// Optional, default to RabbitMQ.Client.ConnectionFactory default
 		/// </summary>
 		public string VirtualHost { get; set; }
 
 		/// <summary>
-		/// Default to "guest"
+		/// Optional, default to RabbitMQ.Client.ConnectionFactory default
 		/// </summary>
 		public string UserName { get; set; }
 
 		/// <summary>
-		/// Default to "guest"
+		/// Optional, default to RabbitMQ.Client.ConnectionFactory default
 		/// </summary>
 		public string Password { get; set; }
 
 		/// <summary>
-		/// Default to 60 seconds
+		/// Optional, default to RabbitMQ.Client.ConnectionFactory default
 		/// </summary>
 		public ushort? RequestedHeartbeat { get; set; }
 
 		/// <summary>
-		/// Default to 5672
+		/// Optional, default to RabbitMQ.Client.ConnectionFactory default
 		/// </summary>
 		public int? Port { get; set; }
 
 		/// <summary>
-		/// Default to "logs"
+		/// Optional, Default to "logs"
 		/// </summary>
 		public string Exchange { get; set; }
 
 		/// <summary>
-		/// Default to ""
+		/// Optional, Default to ""
 		/// </summary>
 		public string RoutingKey { get; set; }
 
@@ -80,14 +78,31 @@ namespace log4net.Appender
 
 		public override void ActivateOptions()
 		{
-			var factory = new ConnectionFactory {
-				HostName = HostName ?? "localhost", 
-				VirtualHost = VirtualHost ?? "/", 
-				UserName = UserName ?? "guest", 
-				Password = Password ?? "guest", 
-				RequestedHeartbeat = RequestedHeartbeat ?? 60, 
-				Port = Port ?? 5672
-			};
+			var factory = new ConnectionFactory();
+			if(!string.IsNullOrWhiteSpace(HostName))
+			{
+				factory.HostName = HostName;
+			}
+			if(!string.IsNullOrWhiteSpace(VirtualHost))
+			{
+				factory.VirtualHost = VirtualHost;
+			}
+			if(!string.IsNullOrWhiteSpace(UserName))
+			{
+				factory.UserName = UserName;
+			}
+			if(!string.IsNullOrWhiteSpace(Password))
+			{
+				factory.Password = Password;
+			}
+			if(RequestedHeartbeat.HasValue)
+			{
+				factory.RequestedHeartbeat = RequestedHeartbeat.Value;
+			}
+			if(Port.HasValue)
+			{
+				factory.Port = Port.Value;
+			}
 			_modelHandler.ActivateOptions(factory, Exchange ?? "logs", RoutingKey ?? "", ErrorHandler);
 		}
 	}
