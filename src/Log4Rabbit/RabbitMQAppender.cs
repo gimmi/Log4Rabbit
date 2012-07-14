@@ -34,14 +34,14 @@ namespace log4net.Appender
 		public string Password { get; set; }
 
 		/// <summary>
-		/// Default to 60 seconds
+		/// Value in seconds, default to 0 that mean no heartbeat
 		/// </summary>
-		public ushort? RequestedHeartbeat { get; set; }
+		public ushort RequestedHeartbeat { get; set; }
 
 		/// <summary>
 		/// Default to 5672
 		/// </summary>
-		public int? Port { get; set; }
+		public int Port { get; set; }
 
 		/// <summary>
 		/// Default to "logs"
@@ -84,9 +84,9 @@ namespace log4net.Appender
 				HostName = HostName ?? "localhost", 
 				VirtualHost = VirtualHost ?? "/", 
 				UserName = UserName ?? "guest", 
-				Password = Password ?? "guest", 
-				RequestedHeartbeat = RequestedHeartbeat ?? 60, 
-				Port = Port ?? 5672
+				Password = Password ?? "guest",
+				RequestedHeartbeat = (RequestedHeartbeat == default(ushort) ? (ushort)0 : RequestedHeartbeat),
+				Port = (Port == default(int) ? 5672 : Port)
 			};
 			_modelHandler.ActivateOptions(factory, Exchange ?? "logs", RoutingKey ?? "", ErrorHandler);
 		}

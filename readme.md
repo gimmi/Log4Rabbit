@@ -17,7 +17,7 @@ Appender configuration sample
 	<VirtualHost value="/"/> <!-- Default to / -->
 	<UserName value="guest"/> <!-- Default to guest -->
 	<Password value="guest"/> <!-- Default to guest -->
-	<RequestedHeartbeat value="60"/> <!-- Default to 60 seconds -->
+	<RequestedHeartbeat value="0"/> <!-- Value in seconds, default to 0 that mean no heartbeat -->
 	<Port value="5672"/> <!-- Default to 5672 -->
 	<Exchange value="logs"/> <!-- Default to logs -->
 	<RoutingKey value=""/> <!-- Default to empty -->
