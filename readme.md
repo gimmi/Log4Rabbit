@@ -14,7 +14,7 @@ Appender configuration sample
 ```xml
 <appender name="RabbitMQAppender" type="log4net.Appender.RabbitMQAppender, Log4Rabbit">
 	<HostName value="localhost" /> <!-- Optional, default to RabbitMQ.Client.ConnectionFactory default -->
-	<VirtualHost value="/" /> <!-- Optional, default to RabbitMQ.Client.ConnectionFactory default / -->
+	<VirtualHost value="/" /> <!-- Optional, default to RabbitMQ.Client.ConnectionFactory default -->
 	<UserName value="guest" /> <!-- Optional, default to RabbitMQ.Client.ConnectionFactory default -->
 	<Password value="guest" /> <!-- Optional, default to RabbitMQ.Client.ConnectionFactory default -->
 	<RequestedHeartbeat value="0" /> <!-- Optional, default to RabbitMQ.Client.ConnectionFactory default -->
