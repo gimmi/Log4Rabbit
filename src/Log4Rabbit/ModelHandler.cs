@@ -19,7 +19,6 @@ namespace log4net.Appender
 		public void ActivateOptions(ConnectionFactory connectionFactory)
 		{
 			_connectionFactory = connectionFactory;
-			EnsureConnected();
 		}
 
 		public void Publish(string contentEncoding, string contentType, byte[] body)
