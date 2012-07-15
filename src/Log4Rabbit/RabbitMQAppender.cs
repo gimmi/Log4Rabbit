@@ -88,7 +88,7 @@ namespace log4net.Appender
 				RequestedHeartbeat = (RequestedHeartbeat == default(ushort) ? (ushort)0 : RequestedHeartbeat),
 				Port = (Port == default(int) ? 5672 : Port)
 			};
-			_modelHandler.ActivateOptions(factory, Exchange ?? "logs", RoutingKey ?? "", ErrorHandler);
+			_modelHandler.ActivateOptions(factory, Exchange ?? "logs", RoutingKey ?? "");
 		}
 	}
 }
