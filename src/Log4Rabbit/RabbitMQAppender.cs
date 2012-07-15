@@ -1,17 +1,29 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using RabbitMQ.Client;
 using log4net.Core;
 using log4net.Layout;
-using log4net.Util;
 
 namespace log4net.Appender
 {
 	public class RabbitMQAppender : AppenderSkeleton
 	{
-		private readonly XmlLayout _xmlLayout = new XmlLayout();
-		private readonly ModelHandler _modelHandler = new ModelHandler();
+		private readonly XmlLayout _xmlLayout;
+		private readonly ModelHandler _modelHandler;
+
+		public RabbitMQAppender()
+		{
+			_xmlLayout = new XmlLayout();
+			_modelHandler = new ModelHandler(this);
+			HostName = "localhost";
+			VirtualHost = "/";
+			UserName = "guest";
+			Password = "guest";
+			RequestedHeartbeat = 0;
+			Port = 5672;
+			Exchange = "logs";
+			RoutingKey = "";
+		}
 
 		/// <summary>
 		/// Default to "localhost"
@@ -80,15 +92,14 @@ namespace log4net.Appender
 
 		public override void ActivateOptions()
 		{
-			var factory = new ConnectionFactory {
-				HostName = HostName ?? "localhost", 
-				VirtualHost = VirtualHost ?? "/", 
-				UserName = UserName ?? "guest", 
-				Password = Password ?? "guest",
-				RequestedHeartbeat = (RequestedHeartbeat == default(ushort) ? (ushort)0 : RequestedHeartbeat),
-				Port = (Port == default(int) ? 5672 : Port)
-			};
-			_modelHandler.ActivateOptions(factory, Exchange ?? "logs", RoutingKey ?? "");
+			_modelHandler.ActivateOptions(new ConnectionFactory {
+				HostName = HostName,
+				VirtualHost = VirtualHost,
+				UserName = UserName,
+				Password = Password,
+				RequestedHeartbeat = RequestedHeartbeat,
+				Port = Port
+			});
 		}
 	}
 }
