@@ -4,6 +4,7 @@
 /src/*/bin/
 /src/*/obj/
 /src/*/*.user
+/src/_ReSharper.*/
 
 # Managed by NuGet
 /lib/
