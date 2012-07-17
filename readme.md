@@ -21,7 +21,12 @@ Appender configuration sample
 	<Port value="5672"/> <!-- Default to 5672 -->
 	<Exchange value="logs"/> <!-- Default to logs -->
 	<RoutingKey value=""/> <!-- Default to empty -->
-	<ReconnectionDelay value="5"/> <!-- Seconds to wait between reconnection attempts, if the connection die. Specify 0 to reconnect immediately. Default to 5 seconds -->
+	<!-- 
+	Seconds to wait between reconnection attempts, if the connection die. 
+	Specify 0 to reconnect immediately. 
+	Default to 5 seconds 
+	-->
+	<ReconnectionDelay value="5"/>
 </appender>
 ```
 
