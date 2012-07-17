@@ -9,12 +9,11 @@ namespace log4net.Appender
 	public class RabbitMQAppender : AppenderSkeleton
 	{
 		private readonly XmlLayout _xmlLayout;
-		private readonly ModelHandler _modelHandler;
+		private RecoverableConnection _connection;
 
 		public RabbitMQAppender()
 		{
 			_xmlLayout = new XmlLayout();
-			_modelHandler = new ModelHandler(this);
 			HostName = "localhost";
 			VirtualHost = "/";
 			UserName = "guest";
@@ -23,6 +22,7 @@ namespace log4net.Appender
 			Port = 5672;
 			Exchange = "logs";
 			RoutingKey = "";
+			ReconnectionDelay = 5;
 		}
 
 		/// <summary>
@@ -65,9 +65,15 @@ namespace log4net.Appender
 		/// </summary>
 		public string RoutingKey { get; set; }
 
+		/// <summary>
+		/// Seconds to wait between reconnection attempts, if the connection die. Specify 0 to reconnect immediately. Default to 5 seconds
+		/// </summary>
+		public int ReconnectionDelay { get; set; }
+
 		protected override void OnClose()
 		{
-			_modelHandler.ShutDown();
+			_connection.Dispose();
+			_connection = null;
 		}
 
 		protected override void Append(LoggingEvent[] loggingEvents)
@@ -82,7 +88,7 @@ namespace log4net.Appender
 			}
 			sb.Append("</events>");
 
-			_modelHandler.Publish("utf-8", "application/xml", Encoding.UTF8.GetBytes(sb.ToString()));
+			_connection.Publish(Exchange, RoutingKey, "utf-8", "application/xml", Encoding.UTF8.GetBytes(sb.ToString()));
 		}
 
 		protected override void Append(LoggingEvent loggingEvent)
@@ -92,14 +98,14 @@ namespace log4net.Appender
 
 		public override void ActivateOptions()
 		{
-			_modelHandler.ActivateOptions(new ConnectionFactory {
+			_connection = RecoverableConnection.Create(new ConnectionFactory {
 				HostName = HostName,
 				VirtualHost = VirtualHost,
 				UserName = UserName,
 				Password = Password,
 				RequestedHeartbeat = RequestedHeartbeat,
 				Port = Port
-			});
+			}, ReconnectionDelay);
 		}
 	}
 }

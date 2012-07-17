@@ -39,39 +39,6 @@ namespace log4net.Appender
 		}
 
 		[Test]
-		public void Should_use_configured_values()
-		{
-			XmlConfigurator.Configure(new MemoryStream(Encoding.UTF8.GetBytes(@"
-<log4net>
-	<appender name='RabbitMQAppender' type='log4net.Appender.RabbitMQAppender, Log4Rabbit'>
-		<HostName value='host'/>
-		<VirtualHost value='vh'/>
-		<UserName value='usr'/>
-		<Password value='pwd'/>
-		<RequestedHeartbeat value='5'/>
-		<Port value='8080'/>
-		<Exchange value='xch'/>
-		<RoutingKey value='rk'/>
-	</appender>
-	<root>
-		<level value='ALL' />
-		<appender-ref ref='RabbitMQAppender' />
-	</root>
-</log4net>
-")));
-
-			var appender = (RabbitMQAppender)LogManager.GetRepository().GetAppenders().First();
-			appender.HostName.Should().Be.EqualTo("host");
-			appender.VirtualHost.Should().Be.EqualTo("vh");
-			appender.UserName.Should().Be.EqualTo("usr");
-			appender.Password.Should().Be.EqualTo("pwd");
-			appender.RequestedHeartbeat.Should().Be.EqualTo(5);
-			appender.Port.Should().Be.EqualTo(8080);
-			appender.Exchange.Should().Be.EqualTo("xch");
-			appender.RoutingKey.Should().Be.EqualTo("rk");
-		}
-
-		[Test]
 		public void Should_log_all_events()
 		{
 			ConfigureWithDefault();
@@ -93,10 +60,9 @@ namespace log4net.Appender
 			int i = 1;
 			while(true)
 			{
-				_target.Info(i);
-				Debug.WriteLine("Published " + i);
-				i++;
-				Thread.Sleep(100);
+				Debug.WriteLine("Publishing " + i);
+				_target.Info(i++);
+				Thread.Sleep(10);
 			}
 		}
 
