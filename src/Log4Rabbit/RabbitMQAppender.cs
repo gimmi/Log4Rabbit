@@ -78,7 +78,7 @@ namespace log4net.Appender
 
 		protected override void Append(LoggingEvent[] loggingEvents)
 		{
-			var sb = new StringBuilder(@"<?xml version=""1.0"" ?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">");
+			var sb = new StringBuilder(@"<?xml version=""1.0"" encoding=""utf-8""?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">");
 			using(var sr = new StringWriter(sb))
 			{
 				foreach(LoggingEvent log in loggingEvents)
