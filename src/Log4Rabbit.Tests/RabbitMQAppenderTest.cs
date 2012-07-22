@@ -52,20 +52,6 @@ namespace log4net.Appender
 			msgs.Should().Have.Count.EqualTo(1000);
 		}
 
-		[Test, Ignore("for testing connection/model recovery. Need to manually close/shutdown rabbit")]
-		public void Should_recover_from_connection_errors()
-		{
-			ConfigureWithDefault();
-
-			int i = 1;
-			while(true)
-			{
-				Debug.WriteLine("Publishing " + i);
-				_target.Info(i++);
-				Thread.Sleep(10);
-			}
-		}
-
 		[Test]
 		public void Should_log_basic_information()
 		{
