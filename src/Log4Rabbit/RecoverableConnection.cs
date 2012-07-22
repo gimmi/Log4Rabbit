@@ -11,6 +11,7 @@ namespace log4net.Appender
 		private readonly int _reconnectionDelay;
 		private IConnection _connection;
 		private IModel _model;
+		private bool _disposed;
 
 		private RecoverableConnection(ConnectionFactory connectionFactory, int reconnectionDelay)
 		{
@@ -29,7 +30,7 @@ namespace log4net.Appender
 		{
 			lock(this)
 			{
-				if(_connection.IsOpen)
+				if(_connection.IsOpen && _model.IsOpen)
 				{
 					IBasicProperties basicProperties = _model.CreateBasicProperties();
 					basicProperties.ContentEncoding = contentEncoding;
@@ -49,18 +50,27 @@ namespace log4net.Appender
 			LogLog.Debug(typeof(RecoverableConnection), "Connecting");
 			IConnection connection = _connectionFactory.CreateConnection();
 			IModel model = connection.CreateModel();
-			Replace(connection, model);
+			SetState(false, connection, model);
 			LogLog.Debug(typeof(RecoverableConnection), "Connection established");
 		}
 
 		private void OnConnectionShutdown(IConnection connection, ShutdownEventArgs reason)
 		{
-			LogLog.Debug(typeof(RecoverableConnection), "Retrying to connect");
+			ScheduleReconnection();
+		}
+
+		private void OnModelShutdown(IModel model, ShutdownEventArgs reason)
+		{
+			ScheduleReconnection();
+		}
+
+		private void ScheduleReconnection()
+		{
 			new Timer(t => {
 				((Timer)t).Dispose();
 				lock(this)
 				{
-					if(!ReferenceEquals(_connection, connection))
+					if(_disposed)
 					{
 						return;
 					}
@@ -72,22 +82,24 @@ namespace log4net.Appender
 				catch(Exception e)
 				{
 					LogLog.Debug(typeof(RecoverableConnection), "Failed reconnecting", e);
-					OnConnectionShutdown(connection, null);
+					ScheduleReconnection();
 				}
 			}).Change(_reconnectionDelay*1000, Timeout.Infinite);
 		}
 
 		public void Dispose()
 		{
-			Replace(null, null);
+			SetState(true, null, null);
 		}
 
-		private void Replace(IConnection connection, IModel model)
+		private void SetState(bool disposed, IConnection connection, IModel model)
 		{
 			lock(this)
 			{
+				_disposed = disposed;
 				if(_model != null)
 				{
+					_model.ModelShutdown -= OnModelShutdown;
 					_model.Abort();
 				}
 				if(_connection != null)
@@ -96,8 +108,12 @@ namespace log4net.Appender
 					_connection.Abort(0);
 				}
 				_model = model;
+				if(_model != null)
+				{
+					_model.ModelShutdown += OnModelShutdown;
+				}
 				_connection = connection;
-				if (_connection != null)
+				if(_connection != null)
 				{
 					_connection.ConnectionShutdown += OnConnectionShutdown;
 				}
