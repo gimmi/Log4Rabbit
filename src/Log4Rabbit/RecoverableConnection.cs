@@ -49,7 +49,6 @@ namespace log4net.Appender
 			LogLog.Debug(typeof(RecoverableConnection), "Connecting");
 			IConnection connection = _connectionFactory.CreateConnection();
 			IModel model = connection.CreateModel();
-			connection.AutoClose = true;
 			Replace(connection, model);
 			LogLog.Debug(typeof(RecoverableConnection), "Connection established");
 		}
@@ -87,16 +86,13 @@ namespace log4net.Appender
 		{
 			lock(this)
 			{
-				if (_connection != null)
-				{
-					_connection.ConnectionShutdown -= OnConnectionShutdown;
-				}
-				if (_model != null)
+				if(_model != null)
 				{
 					_model.Abort();
 				}
 				if(_connection != null)
 				{
+					_connection.ConnectionShutdown -= OnConnectionShutdown;
 					_connection.Abort(0);
 				}
 				_model = model;
