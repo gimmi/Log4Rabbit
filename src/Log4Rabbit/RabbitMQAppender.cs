@@ -77,7 +77,7 @@ namespace log4net.Appender
 
 		protected override void Append(LoggingEvent loggingEvent)
 		{
-			loggingEvent.GetLoggingEventData(FixFlags.All);
+			loggingEvent.Fix = FixFlags.All;
 			_worker.Enqueue(loggingEvent);
 		}
 

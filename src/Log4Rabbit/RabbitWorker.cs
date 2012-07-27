@@ -4,6 +4,7 @@ using System.Text;
 using RabbitMQ.Client;
 using log4net.Core;
 using log4net.Layout;
+using log4net.Util;
 
 namespace log4net.Appender
 {
@@ -37,6 +38,8 @@ namespace log4net.Appender
 			}
 			sb.Append("</events>");
 			var body = Encoding.UTF8.GetBytes(sb.ToString());
+
+			LogLog.Debug(typeof(RabbitWorker), string.Concat("publishing ", logs.Length, " logs"));
 
 			try
 			{
@@ -74,12 +77,14 @@ namespace log4net.Appender
 
 		public void Connect()
 		{
+			LogLog.Debug(typeof(RabbitWorker), "connecting");
 			_connection = _connectionFactory.CreateConnection();
 			_model = _connection.CreateModel();
 		}
 
 		public void Disconnect()
 		{
+			LogLog.Debug(typeof(RabbitWorker), "disconnecting");
 			_model.Abort();
 			_connection.Abort(0);
 		}
