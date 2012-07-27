@@ -48,6 +48,8 @@ namespace log4net.Appender
 				_target.Info(i);
 			}
 
+			LogManager.Shutdown();
+
 			Consumer.LogData[] msgs = Consumer.GetAllMessages().ToArray();
 			msgs.Should().Have.Count.EqualTo(1000);
 		}
@@ -58,6 +60,8 @@ namespace log4net.Appender
 			ConfigureWithDefault();
 
 			_target.Info("a log");
+
+			LogManager.Shutdown();
 
 			Consumer.LogData ev = Consumer.GetAllMessages().First();
 			ev.Domain.Should().Be.EqualTo(AppDomain.CurrentDomain.FriendlyName);
@@ -82,6 +86,9 @@ namespace log4net.Appender
 			{
 				_target.Info("a log", e);
 			}
+
+			LogManager.Shutdown();
+
 			Consumer.LogData ev = Consumer.GetAllMessages().First();
 			ev.Exception.Should().Contain("exc msg");
 		}
@@ -97,6 +104,8 @@ namespace log4net.Appender
 
 			_target.Info("a log");
 
+			LogManager.Shutdown();
+			
 			Consumer.LogData ev = Consumer.GetAllMessages().First();
 
 			ev.Properties.Should().Have.Count.EqualTo(1);
@@ -114,6 +123,8 @@ namespace log4net.Appender
 			GlobalContext.Properties["globalContextProperty"] = "value";
 
 			_target.Info("a log");
+
+			LogManager.Shutdown();
 
 			Consumer.LogData ev = Consumer.GetAllMessages().First();
 

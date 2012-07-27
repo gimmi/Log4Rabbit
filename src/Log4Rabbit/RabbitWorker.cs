@@ -16,12 +16,13 @@ namespace log4net.Appender
 		private IConnection _connection;
 		private IModel _model;
 
-		private RabbitWorker(ConnectionFactory connectionFactory, string exchange, string routingKey)
+		public RabbitWorker(ConnectionFactory connectionFactory, string exchange, string routingKey)
 		{
 			_connectionFactory = connectionFactory;
 			_exchange = exchange;
 			_routingKey = routingKey;
 			_xmlLayout = new XmlLayout();
+			Connect();
 		}
 
 		public bool Process(LoggingEvent[] logs)

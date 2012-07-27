@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using RabbitMQ.Client;
 using log4net.Core;
@@ -8,12 +9,10 @@ namespace log4net.Appender
 {
 	public class RabbitMQAppender : AppenderSkeleton
 	{
-		private readonly XmlLayout _xmlLayout;
-		private RecoverableConnection _connection;
+		private WorkerThread<LoggingEvent> _worker; 
 
 		public RabbitMQAppender()
 		{
-			_xmlLayout = new XmlLayout();
 			HostName = "localhost";
 			VirtualHost = "/";
 			UserName = "guest";
@@ -72,40 +71,28 @@ namespace log4net.Appender
 
 		protected override void OnClose()
 		{
-			_connection.Dispose();
-			_connection = null;
-		}
-
-		protected override void Append(LoggingEvent[] loggingEvents)
-		{
-			var sb = new StringBuilder(@"<?xml version=""1.0"" encoding=""utf-8""?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">");
-			using(var sr = new StringWriter(sb))
-			{
-				foreach(LoggingEvent log in loggingEvents)
-				{
-					_xmlLayout.Format(sr, log);
-				}
-			}
-			sb.Append("</events>");
-
-			_connection.Publish(Exchange, RoutingKey, "utf-8", "application/xml", Encoding.UTF8.GetBytes(sb.ToString()));
+			_worker.Dispose();
+			_worker = null;
 		}
 
 		protected override void Append(LoggingEvent loggingEvent)
 		{
-			Append(new[] { loggingEvent });
+			loggingEvent.GetLoggingEventData(FixFlags.All);
+			_worker.Enqueue(loggingEvent);
 		}
 
 		public override void ActivateOptions()
 		{
-			_connection = RecoverableConnection.Create(new ConnectionFactory {
-				HostName = HostName,
-				VirtualHost = VirtualHost,
-				UserName = UserName,
-				Password = Password,
-				RequestedHeartbeat = RequestedHeartbeat,
+			var connectionFactory = new ConnectionFactory {
+				HostName = HostName, 
+				VirtualHost = VirtualHost, 
+				UserName = UserName, 
+				Password = Password, 
+				RequestedHeartbeat = RequestedHeartbeat, 
 				Port = Port
-			}, ReconnectionDelay);
+			};
+			var worker = new RabbitWorker(connectionFactory, Exchange, RoutingKey);
+			_worker = new WorkerThread<LoggingEvent>(string.Concat(GetType().Name, " ", Name), TimeSpan.FromSeconds(5), 1000, worker);
 		}
 	}
 }
