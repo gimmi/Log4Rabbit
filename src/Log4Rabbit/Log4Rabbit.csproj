@@ -49,6 +49,7 @@
     <Compile Include="RabbitMQAppender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecoverableConnection.cs" />
+    <Compile Include="WorkerThread.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
