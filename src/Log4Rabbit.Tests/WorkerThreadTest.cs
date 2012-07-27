@@ -75,15 +75,31 @@ namespace log4net.Appender
 			});
 		}
 
+		[Test]
+		public void Should_be_able_to_dispose_failing_worker()
+		{
+			var worker = new LogWorker{ReturnValue = false};
+			var target = new WorkerThread<int>("test", TimeSpan.FromDays(1), int.MaxValue, worker);
+
+			target.Enqueue(1);
+
+			target.Dispose();
+
+			worker.Logs.Should().Have.SameSequenceAs(new[] {
+				"1",
+				"Disposed"
+			});
+		}
+
 		public class LogWorker : IWorker<int>
 		{
 			public List<string> Logs = new List<string>();
 			public AutoResetEvent Go = new AutoResetEvent(false);
 			public bool ReturnValue = true;
 
-			public bool Process(int[] items)
+			public bool Process(int[] logs)
 			{
-				Logs.Add(string.Join(", ", items));
+				Logs.Add(string.Join(", ", logs));
 				Go.Set();
 				return ReturnValue;
 			}
