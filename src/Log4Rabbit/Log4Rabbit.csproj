@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecoverableConnection.cs" />
     <Compile Include="WorkerThread.cs" />
+    <Compile Include="XmlMessageBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

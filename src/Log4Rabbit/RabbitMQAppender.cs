@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 using RabbitMQ.Client;
 using log4net.Core;
-using log4net.Layout;
 using log4net.Util;
 
 namespace log4net.Appender
@@ -12,7 +9,7 @@ namespace log4net.Appender
 	public class RabbitMQAppender : AppenderSkeleton
 	{
 		private ConnectionFactory _connectionFactory;
-		private XmlLayout _xmlLayout;
+		private XmlMessageBuilder _messageBuilder;
 		private WorkerThread<LoggingEvent> _worker;
 
 		public RabbitMQAppender()
@@ -87,8 +84,8 @@ namespace log4net.Appender
 
 		public override void ActivateOptions()
 		{
-			_xmlLayout = new XmlLayout{ Prefix = null };
-			_xmlLayout.ActivateOptions();
+			_messageBuilder = new XmlMessageBuilder();
+			_messageBuilder.ActivateOptions();
 			_connectionFactory = new ConnectionFactory {
 				HostName = HostName, 
 				VirtualHost = VirtualHost, 
@@ -105,16 +102,7 @@ namespace log4net.Appender
 			Stopwatch sw = Stopwatch.StartNew();
 			try
 			{
-				var sb = new StringBuilder(@"<?xml version=""1.0"" encoding=""utf-8""?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">");
-				using (var sr = new StringWriter(sb))
-				{
-					foreach (LoggingEvent log in logs)
-					{
-						_xmlLayout.Format(sr, log);
-					}
-				}
-				sb.Append("</events>");
-				byte[] body = Encoding.UTF8.GetBytes(sb.ToString());
+				byte[] body = _messageBuilder.Build(logs);
 
 				LogLog.Debug(typeof(RabbitMQAppender), string.Concat("publishing ", logs.Length, " logs"));
 
@@ -125,8 +113,8 @@ namespace log4net.Appender
 					{
 						LogLog.Debug(typeof(RabbitMQAppender), string.Concat("model created ", sw.Elapsed));
 						IBasicProperties basicProperties = model.CreateBasicProperties();
-						basicProperties.ContentEncoding = "utf-8";
-						basicProperties.ContentType = _xmlLayout.ContentType;
+						basicProperties.ContentEncoding = _messageBuilder.ContentEncoding;
+						basicProperties.ContentType = _messageBuilder.ContentType;
 						basicProperties.DeliveryMode = 2;
 						model.BasicPublish(Exchange, RoutingKey, basicProperties, body);
 						LogLog.Debug(typeof(RabbitMQAppender), string.Concat("message sent ", sw.Elapsed));
