@@ -12,8 +12,8 @@ namespace log4net.Appender
 		[Test]
 		public void Should_dequeue_in_batch()
 		{
-			var worker = new LogWorker();
-			var target = new WorkerThread<int>("test", TimeSpan.FromSeconds(.75), int.MaxValue, worker);
+			var worker = new TestProcessor();
+			var target = new WorkerThread<int>("test", TimeSpan.FromSeconds(.75), int.MaxValue, worker.Process);
 
 			target.Enqueue(1);
 			target.Enqueue(2);
@@ -36,8 +36,8 @@ namespace log4net.Appender
 		[Test]
 		public void Should_not_dequeue_when_failing()
 		{
-			var worker = new LogWorker { ReturnValue = false };
-			var target = new WorkerThread<int>("test", TimeSpan.FromSeconds(.75), int.MaxValue, worker);
+			var worker = new TestProcessor { ReturnValue = false };
+			var target = new WorkerThread<int>("test", TimeSpan.FromSeconds(.75), int.MaxValue, worker.Process);
 
 			target.Enqueue(1);
 			target.Enqueue(2);
@@ -60,8 +60,8 @@ namespace log4net.Appender
 		[Test]
 		public void Should_dequeue_all_when_disposing()
 		{
-			var worker = new LogWorker();
-			var target = new WorkerThread<int>("test", TimeSpan.FromDays(1), int.MaxValue, worker);
+			var worker = new TestProcessor();
+			var target = new WorkerThread<int>("test", TimeSpan.FromDays(1), int.MaxValue, worker.Process);
 
 			target.Enqueue(1);
 			target.Enqueue(2);
@@ -70,28 +70,26 @@ namespace log4net.Appender
 			target.Dispose();
 
 			worker.Logs.Should().Have.SameSequenceAs(new[] {
-				"1, 2, 3",
-				"Disposed"
+				"1, 2, 3"
 			});
 		}
 
 		[Test]
 		public void Should_be_able_to_dispose_failing_worker()
 		{
-			var worker = new LogWorker{ReturnValue = false};
-			var target = new WorkerThread<int>("test", TimeSpan.FromDays(1), int.MaxValue, worker);
+			var worker = new TestProcessor{ReturnValue = false};
+			var target = new WorkerThread<int>("test", TimeSpan.FromDays(1), int.MaxValue, worker.Process);
 
 			target.Enqueue(1);
 
 			target.Dispose();
 
 			worker.Logs.Should().Have.SameSequenceAs(new[] {
-				"1",
-				"Disposed"
+				"1"
 			});
 		}
 
-		public class LogWorker : IWorker<int>
+		public class TestProcessor
 		{
 			public List<string> Logs = new List<string>();
 			public AutoResetEvent Go = new AutoResetEvent(false);
@@ -102,11 +100,6 @@ namespace log4net.Appender
 				Logs.Add(string.Join(", ", logs));
 				Go.Set();
 				return ReturnValue;
-			}
-
-			public void Dispose()
-			{
-				Logs.Add("Disposed");
 			}
 		}
 	}

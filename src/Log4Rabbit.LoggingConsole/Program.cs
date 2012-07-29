@@ -24,7 +24,7 @@ namespace Log4Rabbit.LoggingConsole
 				Thread.Sleep(Interval);
 			}
 
-			LogManager.Shutdown();
+			//LogManager.Shutdown();
 		}
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 
 namespace log4net.Appender
@@ -12,16 +11,16 @@ namespace log4net.Appender
 		private readonly Thread _thread;
 		private readonly TimeSpan _interval;
 		private readonly int _maxSize;
-		private readonly IWorker<T> _worker;
+		private readonly Func<T[], bool> _processor;
 
-		public WorkerThread(string name, TimeSpan interval, int maxSize, IWorker<T> worker)
+		public WorkerThread(string name, TimeSpan interval, int maxSize, Func<T[], bool> processor)
 		{
 			_interval = interval;
 			_maxSize = maxSize;
-			_worker = worker;
+			_processor = processor;
 			_queue = new ConcurrentQueue<T>();
 			_disposeEvent = new AutoResetEvent(false);
-			_thread = new Thread(Loop) { Name = name };
+			_thread = new Thread(Loop) { Name = name, IsBackground = true };
 			_thread.Start();
 		}
 
@@ -37,7 +36,6 @@ namespace log4net.Appender
 		{
 			_disposeEvent.Set();
 			_thread.Join();
-			_worker.Dispose();
 		}
 
 		private void Loop()
@@ -56,7 +54,7 @@ namespace log4net.Appender
 		private void Dequeue()
 		{
 			T[] items = _queue.ToArray();
-			if(items.Length > 0 && _worker.Process(items))
+			if(items.Length > 0 && _processor.Invoke(items))
 			{
 				Array.ForEach(items, e => _queue.TryDequeue(out e));
 			}
