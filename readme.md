@@ -21,12 +21,8 @@ Appender configuration sample
 	<Port value="5672"/> <!-- Default to 5672 -->
 	<Exchange value="logs"/> <!-- Default to logs -->
 	<RoutingKey value=""/> <!-- Default to empty -->
-	<!-- 
-	Seconds to wait between reconnection attempts, if the connection die. 
-	Specify 0 to reconnect immediately. 
-	Default to 5 seconds 
-	-->
-	<ReconnectionDelay value="5"/>
+	<FlushInterval value="5"/> <!-- Seconds to wait between message send. Default to 5 seconds -->
+	<MaxBufferSize value="10000"/> <!-- The maximum size of the buffer used to hold the logging events. Whan this size is reached logs are discarded. Default to 10.000 -->
 </appender>
 ```
 

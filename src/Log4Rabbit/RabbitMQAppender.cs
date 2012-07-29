@@ -22,8 +22,8 @@ namespace log4net.Appender
 			Port = 5672;
 			Exchange = "logs";
 			RoutingKey = "";
-			SendInterval = 5;
-			MaxQueuedLogs = 10000;
+			FlushInterval = 5;
+			MaxBufferSize = 10000;
 		}
 
 		/// <summary>
@@ -69,12 +69,12 @@ namespace log4net.Appender
 		/// <summary>
 		/// Seconds to wait between message send. Default to 5 seconds
 		/// </summary>
-		public int SendInterval { get; set; }
+		public int FlushInterval { get; set; }
 
 		/// <summary>
-		/// Max number of log queued for sending. Logs exceeding will be discarded. Default to 10.000
+		/// The maximum size of the buffer used to hold the logging events. Whan this size is reached logs are discarded. Default to 10.000
 		/// </summary>
-		public int MaxQueuedLogs { get; set; }
+		public int MaxBufferSize { get; set; }
 
 		protected override void OnClose()
 		{
@@ -100,7 +100,7 @@ namespace log4net.Appender
 				RequestedHeartbeat = RequestedHeartbeat, 
 				Port = Port
 			};
-			_worker = new WorkerThread<LoggingEvent>(string.Concat("Worker for log4net appender '", Name, "'"), TimeSpan.FromSeconds(SendInterval), MaxQueuedLogs, Process);
+			_worker = new WorkerThread<LoggingEvent>(string.Concat("Worker for log4net appender '", Name, "'"), TimeSpan.FromSeconds(FlushInterval), MaxBufferSize, Process);
 		}
 
 		public bool Process(LoggingEvent[] logs)
