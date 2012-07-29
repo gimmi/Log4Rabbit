@@ -22,7 +22,8 @@ namespace log4net.Appender
 			Port = 5672;
 			Exchange = "logs";
 			RoutingKey = "";
-			ReconnectionDelay = 5;
+			SendInterval = 5;
+			MaxLogsQueued = 10000;
 		}
 
 		/// <summary>
@@ -66,9 +67,14 @@ namespace log4net.Appender
 		public string RoutingKey { get; set; }
 
 		/// <summary>
-		/// Seconds to wait between reconnection attempts, if the connection die. Specify 0 to reconnect immediately. Default to 5 seconds
+		/// Seconds to wait between message send. Default to 5 seconds
 		/// </summary>
-		public int ReconnectionDelay { get; set; }
+		public int SendInterval { get; set; }
+
+		/// <summary>
+		/// Max number of log queued for sending. Default to 10.000
+		/// </summary>
+		public int MaxLogsQueued { get; set; }
 
 		protected override void OnClose()
 		{
@@ -94,7 +100,7 @@ namespace log4net.Appender
 				RequestedHeartbeat = RequestedHeartbeat, 
 				Port = Port
 			};
-			_worker = new WorkerThread<LoggingEvent>(string.Concat("log4net worker for appender '", Name, "'"), TimeSpan.FromSeconds(5), 1000, Process);
+			_worker = new WorkerThread<LoggingEvent>(string.Concat("Worker for log4net appender '", Name, "'"), TimeSpan.FromSeconds(SendInterval), MaxLogsQueued, Process);
 		}
 
 		public bool Process(LoggingEvent[] logs)
@@ -102,26 +108,19 @@ namespace log4net.Appender
 			Stopwatch sw = Stopwatch.StartNew();
 			try
 			{
-				byte[] body = _messageBuilder.Build(logs);
-
 				LogLog.Debug(typeof(RabbitMQAppender), string.Concat("publishing ", logs.Length, " logs"));
-
+				byte[] body = _messageBuilder.Build(logs);
 				using (IConnection connection = _connectionFactory.CreateConnection())
 				{
-					LogLog.Debug(typeof(RabbitMQAppender), string.Concat("connection created ", sw.Elapsed));
 					using (IModel model = connection.CreateModel())
 					{
-						LogLog.Debug(typeof(RabbitMQAppender), string.Concat("model created ", sw.Elapsed));
 						IBasicProperties basicProperties = model.CreateBasicProperties();
 						basicProperties.ContentEncoding = _messageBuilder.ContentEncoding;
 						basicProperties.ContentType = _messageBuilder.ContentType;
 						basicProperties.DeliveryMode = 2;
 						model.BasicPublish(Exchange, RoutingKey, basicProperties, body);
-						LogLog.Debug(typeof(RabbitMQAppender), string.Concat("message sent ", sw.Elapsed));
 					}
-					LogLog.Debug(typeof(RabbitMQAppender), string.Concat("model disposed ", sw.Elapsed));
 				}
-				LogLog.Debug(typeof(RabbitMQAppender), string.Concat("connection disposed ", sw.Elapsed));
 				return true;
 			}
 			catch (Exception e)

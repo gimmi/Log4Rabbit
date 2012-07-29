@@ -23,8 +23,6 @@ namespace Log4Rabbit.LoggingConsole
 				log.Info(++_count);
 				Thread.Sleep(Interval);
 			}
-
-			//LogManager.Shutdown();
 		}
 	}
 }
