@@ -30,7 +30,8 @@ namespace log4net.Appender
 
 		public byte[] Build(LoggingEvent[] logs)
 		{
-			var sb = new StringBuilder(@"<?xml version=""1.0"" encoding=""utf-8""?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">");
+			var sb = new StringBuilder();
+			sb.AppendFormat(@"<?xml version=""1.0"" encoding=""{0}""?><events version=""1.2"" xmlns=""http://logging.apache.org/log4net/schemas/log4net-events-1.2"">", ContentEncoding);
 			using (var sr = new StringWriter(sb))
 			{
 				foreach (LoggingEvent log in logs)
