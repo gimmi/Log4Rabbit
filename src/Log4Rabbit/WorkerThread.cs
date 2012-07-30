@@ -10,13 +10,11 @@ namespace log4net.Appender
 		private readonly AutoResetEvent _disposeEvent;
 		private readonly Thread _thread;
 		private readonly TimeSpan _interval;
-		private readonly int _maxSize;
-		private readonly Func<T[], bool> _processor;
+		private readonly Action<T[]> _processor;
 
-		public WorkerThread(string name, TimeSpan interval, int maxSize, Func<T[], bool> processor)
+		public WorkerThread(string name, TimeSpan interval, Action<T[]> processor)
 		{
 			_interval = interval;
-			_maxSize = maxSize;
 			_processor = processor;
 			_queue = new ConcurrentQueue<T>();
 			_disposeEvent = new AutoResetEvent(false);
@@ -26,10 +24,7 @@ namespace log4net.Appender
 
 		public void Enqueue(T item)
 		{
-			if(_queue.Count < _maxSize)
-			{
-				_queue.Enqueue(item);
-			}
+			_queue.Enqueue(item);
 		}
 
 		public void Dispose()
@@ -53,11 +48,17 @@ namespace log4net.Appender
 
 		private void Dequeue()
 		{
-			T[] items = _queue.ToArray();
-			if(items.Length > 0 && _processor.Invoke(items))
+			int count = _queue.Count;
+			if(count <= 0)
 			{
-				Array.ForEach(items, e => _queue.TryDequeue(out e));
+				return;
 			}
+			var items = new T[count];
+			for(int i = 0; i < count; i++)
+			{
+				_queue.TryDequeue(out items[i]);
+			}
+			_processor.Invoke(items);
 		}
 	}
 }

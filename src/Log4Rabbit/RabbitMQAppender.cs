@@ -23,7 +23,6 @@ namespace log4net.Appender
 			Exchange = "logs";
 			RoutingKey = "";
 			FlushInterval = 5;
-			MaxBufferSize = 10000;
 		}
 
 		/// <summary>
@@ -71,11 +70,6 @@ namespace log4net.Appender
 		/// </summary>
 		public int FlushInterval { get; set; }
 
-		/// <summary>
-		/// The maximum size of the buffer used to hold the logging events. Whan this size is reached logs are discarded. Default to 10.000
-		/// </summary>
-		public int MaxBufferSize { get; set; }
-
 		protected override void OnClose()
 		{
 			_worker.Dispose();
@@ -100,10 +94,10 @@ namespace log4net.Appender
 				RequestedHeartbeat = RequestedHeartbeat, 
 				Port = Port
 			};
-			_worker = new WorkerThread<LoggingEvent>(string.Concat("Worker for log4net appender '", Name, "'"), TimeSpan.FromSeconds(FlushInterval), MaxBufferSize, Process);
+			_worker = new WorkerThread<LoggingEvent>(string.Concat("Worker for log4net appender '", Name, "'"), TimeSpan.FromSeconds(FlushInterval), Process);
 		}
 
-		public bool Process(LoggingEvent[] logs)
+		public void Process(LoggingEvent[] logs)
 		{
 			Stopwatch sw = Stopwatch.StartNew();
 			try
@@ -121,12 +115,10 @@ namespace log4net.Appender
 						model.BasicPublish(Exchange, RoutingKey, basicProperties, body);
 					}
 				}
-				return true;
 			}
 			catch (Exception e)
 			{
 				LogLog.Debug(typeof(RabbitMQAppender), "Exception comunicating with rabbitmq", e);
-				return false;
 			}
 			finally
 			{

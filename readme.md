@@ -22,7 +22,6 @@ Appender configuration sample
 	<Exchange value="logs"/> <!-- Default to logs -->
 	<RoutingKey value=""/> <!-- Default to empty -->
 	<FlushInterval value="5"/> <!-- Seconds to wait between message send. Default to 5 seconds -->
-	<MaxBufferSize value="10000"/> <!-- The maximum size of the buffer used to hold the logging events. Whan this size is reached logs are discarded. Default to 10.000 -->
 </appender>
 ```
 
