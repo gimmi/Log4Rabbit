@@ -89,6 +89,16 @@ namespace log4net.Appender
 			});
 		}
 
+		[Test]
+		public void Should_not_call_processor_when_queue_is_empty()
+		{
+			var worker = new TestProcessor();
+			var target = new WorkerThread<int>("test", TimeSpan.FromMilliseconds(10), int.MaxValue, worker.Process);
+
+			worker.Go.WaitOne(TimeSpan.FromSeconds(1)).Should().Be.False();
+
+		}
+
 		public class TestProcessor
 		{
 			public List<string> Logs = new List<string>();
