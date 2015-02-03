@@ -27,6 +27,14 @@
     <Reference Include="log4net">
       <HintPath>..\..\lib\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Log4Rabbit, Version=0.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Log4Rabbit.0.1.10\lib\net40\Log4Rabbit.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client, Version=3.0.4.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\RabbitMQ.Client.3.0.4\lib\net30\RabbitMQ.Client.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -38,12 +46,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Log4Rabbit\Log4Rabbit.csproj">
-      <Project>{59D8ECF9-2867-43FD-BF18-EFE2758CF14F}</Project>
-      <Name>Log4Rabbit</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
